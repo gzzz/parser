@@ -1,0 +1,54 @@
+﻿@main[]
+^use[interface.p]
+
+<p>объект сам декларирует полную поддержку интерфейса класса test2</p>
+$object[^test::create[]]
+
+<p>можем убедиться:<br/>
+test2 interface implemented: <strong>^if(^interface:implements[$object;test2])[true;false]</strong></p>
+<hr/>
+
+<p>при этом полной поддержки интерфейса класса test3 у него нет<br/>
+test3 interface implemented: <strong>^if(^interface:implements[$object;test3])[true;false]</strong></p>
+<hr/>
+
+<p>но объект поддерживает интерфейс интересующего нас метода<br/>
+test3 «method» interface implemented: <strong>^if(^interface:implements[$object;test3;method])[true;false]</strong></p>
+<hr/>
+
+<p>есть ли у класса метод foreach?<br/>
+implemented foreach method: <strong>^if(^interface:has[$object;foreach])[true;false]</strong></p>
+<hr/>
+
+<p>метод реализует интерфейс метода хеша?<br/>
+implemented hash foreach method: <strong>^if(^interface:has[$object;foreach;hash])[true;false]</strong></p>
+
+
+
+@CLASS
+test
+
+@create[a]
+^interface:declare[test2]
+
+@method[one;two;three]
+
+@foreach[one;two;three]
+
+
+@CLASS
+test2
+
+@create[]
+
+@method[one;two]
+
+
+@CLASS
+test3
+
+@create[]
+
+@method[one;two]
+
+@another[]
