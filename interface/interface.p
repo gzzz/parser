@@ -166,4 +166,4 @@ $result[]
 	$object.[$self.field][^hash::create[]]
 }
 
-^object.[$self.field].add[$.$class[]]
+^object.[$self.field].add[$.$class(true)]
