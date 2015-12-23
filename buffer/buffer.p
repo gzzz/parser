@@ -263,6 +263,7 @@ $result[^self._keys[$column]]
 }
 
 ^self._reset[]
+^self._callback[]
 
 
 @_double[code]
