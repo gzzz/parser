@@ -10,9 +10,10 @@ buffer
 locals
 
 
-@create[data;callback]
+@create[data;callback;params]
 $self.data[^hash::create[$data]]
 $self.callback[$callback]
+$self.params[$params]
 
 ^self._reset[]
 
@@ -70,7 +71,11 @@ $self.slot[$self.data]
 
 @_callback[]
 ^if($self.callback is junction){
-	^self.callback[$self.data]
+	^if($self.params){
+		^self.callback[$self.data;$self.params]
+	}{
+		^self.callback[$self.data]
+	}
 }
 
 
@@ -162,7 +167,15 @@ $result(^self.slot._count[])
 	^throw[buffer.add;Cannot add value into ${self.slot.CLASS_NAME}.]
 }
 
-^self.slot.add[$data]
+^data.foreach[key;value]{
+	$slot[$self.slot.$key]
+
+	^if($slot is hash){
+		^slot.add[$value]
+	}{
+		$self.slot.$key[$value]
+	}
+}
 
 ^self._reset[]
 ^self._callback[]
