@@ -1,0 +1,138 @@
+﻿@USE
+buffer.p
+
+
+@main[]
+<p>Создадим новый буфер.</p>
+
+$buff[^buffer::create[
+	$.one[
+		$.two[some value]
+	]
+	$.three[^hash::create[]]
+][$save]]
+
+^print[$buff]
+
+<p>Добавим хеш к существующему, данные будут не перезаписаны, а добавлены.</p>
+
+^buff.add[
+	$.one[
+		$.some[addition]
+	]
+]
+
+^print[$buff]
+
+<p>Просто запишем значение.</p>
+
+$buff.three.new[value]
+
+^print[$buff]
+
+<p>Зададим глубоко вложенное значение.</p>
+
+$buff.a.b.c.d.e.f[abc]
+
+^print[$buff]
+
+<p>Добавим значение произвольному несуществующему ключу.</p>
+
+^buff.not.exists.add[$.addition[…]]
+
+^print[$buff]
+
+<p>Удалим сразу несколько ключей.</p>
+
+^buff.delete[
+	$.three[]
+	$.not[]
+]
+
+^print[$buff]
+
+<h2>Интерфейс хеша</h2>
+
+<p>Перебор значений.</p>
+<p>Допольнительно доступна переменная ^$position, хранящая текущую итерацию.</p>
+
+<p>^$buff:<br/>
+^buff.foreach[k;v]{
+	${position}: $k
+}[<br/>]</p>
+
+<p>^$buff.one:<br/>
+^buff.one.foreach[k;v]{
+	${position}: $k
+}[<br/>]</p>
+
+<p>Достанем данные из БД.</p>
+
+^connect[mysql://root:@localhost/…?charset=utf8]{
+	$buff[^buffer::sql{
+		SELECT *
+		FROM users
+		WHERE id = 1
+	}]
+}
+
+^print[$buff]
+
+<p>Первый ключ:</p>
+$fk[^buff.at[first;key]]
+$fk
+
+<p>Ключей первого ключа:</p>
+
+^buff.$fk.count[]<br/>
+
+<p>Список ключей:</p>
+
+^print[^buff.$fk.keys[]]
+
+<p>Существует ключ «login»:</p>
+
+^print[^buff.$fk.contains[login]]
+
+<p>Сам ключ «login»:</p>
+^print[^buff.$fk.intersection[$.login[]]]
+
+<p>Пересекается с хешем из ключа «login»:</p>
+
+^print[^buff.$fk.intersects[$.login[]]]
+
+<p>Отсортируем по длине значения.</p>
+
+^buff.$fk.sort[k;v](^v.length[])[desc]
+
+^print[$buff.$fk]
+
+<h2>Дополнительные методы</h2>
+
+<p>Прекроем существующие ключи</p>
+^buff.$fk.redefine[
+	$.login[redefined]
+	$.password[redefined]
+]
+
+^print[$buff.$fk]
+
+<p>Добавим несуществующие ключи (аналогично union, но модификацией текущего хеша, а не в виде нового):</p>
+
+^buff.$fk.append[
+	$.login[appended]
+	$.name[appended]
+]
+
+^print[$buff.$fk]
+
+<p>Каждое изменение данных приводило к записи буфера на диск оператором save.</p>
+
+
+@save[data]
+$s[^json:string[$data]]
+^s.save[/buffer.json]
+
+
+@print[data]
+<pre>^json:string[$data;$.indent(true)]</pre>
