@@ -18,12 +18,8 @@ $self.params[$params]
 ^self._reset[]
 
 
-@sql[query;callback]
-$self.data[^hash::sql{$query}]
-
-$self.callback[$callback]
-
-^self._reset[]
+@sql[query;callback;params]
+^self.create[^hash::sql{$query};$callback;$params]
 
 
 @GET_DEFAULT[name]
