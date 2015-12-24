@@ -122,14 +122,36 @@ $data[^hash::create[$data]]
 
 $data[^hash::create[$data]]
 
-^self.slot.add[^self.slot.union[$data]]
+^self.slot.add[^self.union[$data]]
 
-^self._reset[]
 ^self._callback[]
 
 
 @join[data]
 $result[^self.union[$data]]
+
+
+@put[data]
+^if($data is hash){
+	^data.foreach[;value]{
+		^self._put[$value]
+	}
+}{
+	^self._put[$data]
+}
+
+^self._reset[]
+^self._callback[]
+
+
+@_put[value]
+$key($self.slot + 1)
+
+^while(^self.slot.contains[$key]){
+	^key.inc[]
+}
+
+$self.slot.$key[$value]
 
 
 # Hash interface.
@@ -281,7 +303,6 @@ $result($code)
 $result[^self.slot.union[$data]]
 
 ^self._reset[]
-^self._callback[]
 
 
 
@@ -326,7 +347,7 @@ $keys[^name.split[.]]
 	^if(^keys.line[] == $keys){
 		^BASE:SET_DEFAULT[$key;$value]
 	}{
-		$tmp[$self.$key]
+		$tmp[^BASE:GET_DEFAULT[$key]]
 	}
 }
 
