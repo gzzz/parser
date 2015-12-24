@@ -282,3 +282,53 @@ $result[^self.slot.union[$data]]
 
 ^self._reset[]
 ^self._callback[]
+
+
+
+# Класс позволяет установить значения по ключу, трактуя точки в его имени как разделители уровней.
+
+@CLASS
+lbuffer
+
+
+@OPTIONS
+locals
+
+
+@BASE
+buffer
+
+
+@GET_DEFAULT[name]
+^if(!($self.slot is hash)){
+	^throw[buffer.set;Cannot set value into ${self.slot.CLASS_NAME}.]
+}
+
+$keys[^name.split[.]]
+
+^keys.menu{
+	$key[$keys.piece]
+
+	^if(^keys.line[] == $keys){
+		$result[^BASE:GET_DEFAULT[$key]]
+	}{
+		$tmp[^BASE:GET_DEFAULT[$key]]
+	}
+}
+
+
+@SET_DEFAULT[name;value]
+$keys[^name.split[.]]
+
+^keys.menu{
+	$key[$keys.piece]
+
+	^if(^keys.line[] == $keys){
+		^BASE:SET_DEFAULT[$key;$value]
+	}{
+		$tmp[$self.$key]
+	}
+}
+
+^self._reset[]
+^self._callback[]
