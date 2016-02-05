@@ -167,3 +167,28 @@ $result[]
 }
 
 ^object.[$self.field].add[$.$class(true)]
+
+
+@mixin[donor;accepter;exceptions]
+# $donor      object / class
+# $accepter   object / class
+# $exceptions hash
+#
+# $result void
+
+# Подмешивает методы донора акцептору.
+# Не перекрывает существующие методы акцептора.
+#
+# Третьим параметром можно передать исключения, например, конструкторы.
+#
+# dynamic: ^interface:mixin[$self.donor;$self]
+# static:  ^interface:mixin[$donor:CLASS;$accepter:CLASS]
+
+$interface[^self.interface[$donor.CLASS_NAME]]
+^interface.sub[^hash::create[$exceptions]]
+
+^interface.foreach[method;]{
+	^if(!^self.has[$accepter;$method]){
+		$accepter.$method[^reflection:method[$donor;$method]]
+	}
+}
