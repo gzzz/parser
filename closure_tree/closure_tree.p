@@ -128,10 +128,7 @@ $result[^self.descendantNodes(^node_id.int(0))[$options]]
 @ancestorNodes[nodes;options]
 # Извлекает узлы-предки.
 
-$options[
-	^hash::create[$options]
-	$.with-parent(true)
-]
+$options[^hash::create[$options]]
 
 $ancestors[^self.ancestors[$nodes;$options]]
 
@@ -141,10 +138,7 @@ $result[^self.nodes[$ancestors;ancestor_id;$options]]
 @descendantNodes[nodes;options]
 # Извлекает узлы-потомки.
 
-$options[
-	^hash::create[$options]
-	$.with-parent(true)
-]
+$options[^hash::create[$options]]
 
 $descendants[^self.descendants[$nodes;$options]]
 
@@ -154,10 +148,7 @@ $result[^self.nodes[$descendants;node_id;$options]]
 @siblingNodes[nodes;options]
 # Извлекает узлы-соседи.
 
-$options[
-	^hash::create[$options]
-	$.with-parent(true)
-]
+$options[^hash::create[$options]]
 
 $siblings[^self.siblings[$nodes;$options]]
 
@@ -167,10 +158,7 @@ $result[^self.nodes[$siblings;node_id;$options]]
 @childNodes[nodes;options]
 # Извлекает узлы-дети.
 
-$options[
-	^hash::create[$options]
-	$.with-parent(true)
-]
+$options[^hash::create[$options]]
 
 $children[^self.children[$nodes;$options]]
 
@@ -180,10 +168,7 @@ $result[^self.nodes[$children;node_id;$options]]
 @parentNodes[nodes;options]
 # Извлекает узлы-родители.
 
-$options[
-	^hash::create[$options]
-	$.with-parent(true)
-]
+$options[^hash::create[$options]]
 
 $parents[^self.parents[$nodes;$options]]
 
@@ -211,7 +196,6 @@ $result[^table::sql{
 # Извлекает потомков.
 
 $options[^hash::create[$options]]
-$with_parent(^options.[with-parent].bool(false))
 
 $result[^table::sql{
 	SELECT
@@ -360,7 +344,7 @@ $options[^hash::create[$options]]
 ^void:sql{BEGIN}
 
 ^try{
-	$code
+	$result[$code]
 
 	^void:sql{COMMIT}
 }{
