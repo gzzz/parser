@@ -13,7 +13,7 @@
 # ]]
 
 # ^connect[…]{
-# 	$tree[^ctree.tree(1)]
+# 	$tree[^ctree.select(1)]
 # }
 
 
