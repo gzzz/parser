@@ -8,8 +8,7 @@ static
 
 
 @auto[]
-$self.field[IMPLEMENTS]
-$self.etype[interface.implementation]
+$self._field[IMPLEMENTS]
 
 
 @declare[class]
@@ -37,10 +36,10 @@ $target_interface[^self.interface[$class]]
 ^if(def $method){
 	$result(^self.has[$object;$method;$class])
 }{
-	^if($object.[$self.field]){
+	^if($object.[$self._field]){
 #		Если у объекта в поле IMPLEMENTS указана поддержка интерфейса — верим на слово.
 
-		$result(^object.[$self.field].contains[$class])
+		$result(^object.[$self._field].contains[$class])
 	}{
 #		Иначе проверяем, сверяя «сигнатуры» методов.
 
@@ -52,7 +51,7 @@ $target_interface[^self.interface[$class]]
 
 			$result(true)
 		}{
-			$exception.handled($exception.type eq '$self.etype')
+			$exception.handled($exception.type eq 'interface.implementation')
 
 			$result(false)
 		}
@@ -70,9 +69,12 @@ $target_interface[^self.interface[$class]]
 # Проверяет наличие у объекта указанного метода.
 # Если передано имя класса, то проверяется «сигнатура» метода.
 
-$result(^reflection:method[$object;$method] is junction)
+$hasjunction(^self.is[$method;junction;$object])
+$hasmethod(^reflection:method[$object;$method] is junction)
 
-^if($result && def $class){
+$result($hasjunction || $hasmethod)
+
+^if($hasmethod && def $class){
 	$object[^self.info[$object.CLASS_NAME;$method]]
 	$target[^self.info[$class;$method]]
 
@@ -80,13 +82,51 @@ $result(^reflection:method[$object;$method] is junction)
 }
 
 
-@interface[class]
+@is[object;type;context]
+# $object    string
+# $type      string
+# [$context] junction
+#
+# $result  bool
+
+# Проверяет имеет ли указанный по имени объект заданный тип.
+
+^if($context is void){
+	$context[$caller.self]
+}
+
+$result(false)
+
+^try{
+	$result(
+		^reflection:method[$context;$object] is $type
+		|| (
+			^reflection:is[$object;$type;$context]
+			&& $context.$object is $type
+		)
+	)
+}{
+	$exception.handled(
+		$exception.type eq 'parser.runtime'
+		&& (
+# 			ошибка при проверке string
+			^exception.comment.pos[it has no elements] > -1
+# 			ошибка при проверке таблицы
+			|| ^exception.comment.pos[column not found] > -1
+# 			ошибка при проверке regex и console
+			|| ^exception.comment.pos[reading of invalid field] > -1
+		)
+	)
+}
+
+
+@interface[class;full]
 # $class  string
 #
 # $result hash
 
 # Возвращает интерфейс методов указанного класса.
-# Геттеры и сеттеры игнорирует.
+# Геттеры и сеттеры игнорирует, если не передан аргумент $full.
 
 $result[^hash::create[]]
 
@@ -94,10 +134,20 @@ $methods[^reflection:methods[$class]]
 ^methods.foreach[method;]{
 	$prefix[^method.left(3)]
 
-	^if($prefix ne 'GET' && $prefix ne 'SET'){
+	^if(^full.bool(false) || ($prefix ne 'GET' && $prefix ne 'SET')){
 		$result.$method[^self.info[$class;$method]]
 	}
 }
+
+
+@fields[class]
+# $class  object / class
+#
+# $result hash
+
+# Возвращает информацию о полях объекта.
+
+$result[^reflection:fields[$class]]
 
 
 @info[class;method]
@@ -116,19 +166,19 @@ $result[^reflection:method_info[$class;$method]]
 # $target   hash
 # [$method] string
 #
-# $result   void / interface.implementation exception
+# $result   void / interface.implemented exception
 
 # Проверяет поддержку объектом интерфейса указанного класса.
 # Если указан метод — проверяется только поддержка объектом данного метода.
 
 ^if(def $method){
 	^if(!^self.match[$object;$target;$method]){
-		^throw[$self.etype;Missing or partial implementation of the «${method}» method.]
+		^throw[interface.implemented;;Missing or partial implementation of the «${method}» method.]
 	}
 }{
 	^target.foreach[method;]{
 		^if(!^self.match[$object;$target;$method]){
-			^throw[$self.etype;Missing or partial implementation of the «${method}» method. Class must implement all methods of declared interface: ^target.foreach[method;info]{@${method}[^for[i](0;$info.max_params - 1){…}[^;]]}[, ].]
+			^throw[interface.implemented;;Missing or partial implementation of the «${method}» method. Class must implement all methods of declared interface: ^target.foreach[method;info]{@${method}[^for[i](0;$info.max_params - 1){…}[^;]]}[, ].]
 		}
 	}
 }
@@ -162,11 +212,11 @@ $result[^reflection:method_info[$class;$method]]
 
 $result[]
 
-^if(!$object.[$self.field]){
-	$object.[$self.field][^hash::create[]]
+^if(!$object.[$self._field]){
+	$object.[$self._field][^hash::create[]]
 }
 
-^object.[$self.field].add[$.$class(true)]
+^object.[$self._field].add[$.$class(true)]
 
 
 @mixin[donor;accepter;exceptions]
@@ -185,10 +235,210 @@ $result[]
 # static:  ^interface:mixin[$donor:CLASS;$accepter:CLASS]
 
 $interface[^self.interface[$donor.CLASS_NAME]]
+^interface.sub[^self.interface[$accepter.CLASS_NAME](true)]
 ^interface.sub[^hash::create[$exceptions]]
 
 ^interface.foreach[method;]{
-	^if(!^self.has[$accepter;$method]){
-		$accepter.$method[^reflection:method[$donor;$method]]
+	$accepter.$method[^reflection:method[$donor;$method]]
+}
+
+
+@merge[a;b;exceptions]
+# $a            object / class
+# $b            object / class
+# [$exceptions] hash
+#
+# $result void
+
+# Подмешивает методы и поля одного объекта или класса другому в обе стороны.
+# Таким образом, каждый из классов получает полный общий набор методов.
+# Не перекрывает существующие методы.
+#
+# Третьим параметром можно передать исключения, например, конструкторы.
+#
+# dynamic: ^interface:mixin[$self.a;$self]
+# static:  ^interface:mixin[$a:CLASS;$b:CLASS]
+
+^self.mixin[$a;$b;$exceptions]
+^self.mixin[$b;$a;$exceptions]
+
+
+@field[donor;accepter;exceptions]
+# $donor        object / class
+# $accepter     object / class
+# [$exceptions] hash
+#
+# $result void
+
+# Подмешивает поля одного объекта или класса другому.
+# Третьим параметром можно передать исключения.
+# Не перекрывает существующие поля.
+
+$fields[^self.fields[$donor]]
+^fields.sub[^self.fields[$accepter]]
+^fields.sub[^hash::create[$exceptions]]
+
+^fields.foreach[name;value]{
+	^switch(true){
+		^case(^reflection:is[$name;code;$fields]){
+			$accepter.$name{$value}
+		}
+		^case($value is int || $value is double){
+			$accepter.$name($value)
+		}
+		^case[DEFAULT]{
+			$accepter.$name[$value]
+		}
+	}
+}
+
+
+@ancestors[object;ancestor]
+# $object     string / object / class
+# [$ancestor] string
+#
+# $result hash
+
+# Возвращает список классов-предков указанного класса или объекта.
+# Если указан $ancestor — возвращается список по указанного предка.
+
+$result[^hash::create[]]
+
+^if($object is string){
+	$object[^reflection:class_by_name[$object]]
+}
+
+$base[^reflection:base[$object]]
+
+^while(def $base){
+	$result.[$base.CLASS_NAME]($result + 1)
+
+	^if($base.CLASS_NAME eq $ancestor){
+		$base[]
+	}{
+		$base[^reflection:base[$base]]
+	}
+}
+
+
+@descendant[object;ancestor]
+# $object   string / object / class
+# $ancestor string
+#
+# $result bool
+
+# Возвращает истину, если cреди предков указанного объекта или класса имеется указанный.
+
+$ancestors[^self.ancestors[$object;$ancestor]]
+
+$result(^ancestors.contains[$ancestor])
+
+
+@classes[filename]
+# [$filename] string
+#
+# $result hash / interface.classes exception
+
+# Возвращает хеш доступных классов (аналог ^reflection:classes[]).
+
+# Можно указать имя файла, классы, декларированные в котором, интересуют.
+# При поиске классов в файле наличие методов класса (methoded) не проверяется.
+
+^if(def $filename){
+	^assert(!-f $filename)[File «${filename}» not found.;interface.classes]
+
+	$result[^hash::create[]]
+
+	$file[^file::load[text;$filename]]
+
+	^file.text.match[^^@CLASS\n(.+)^$;mg]{
+		$result.[$match.1][]
+	}
+}{
+	$result[^reflection:classes[]]
+}
+
+
+@pass[method_name;method;classes;options]
+# $method_name string
+# $method      junction / string
+# [$classes]   hash
+# [$options]   hash
+#
+# $result void
+
+# Устанавливает указанным классам указанный метод под указанным именем.
+# Если класы не указаны — устанавливает метод всем доступным пользовательским классам.
+
+# Существующие методы не перекрываются, если не указана опция «force».
+# Установка метода не производится, если у класса имеется сеттер свойства с именем, совпадающим с устанавливаемым или сеттер по умолчанию.
+# Можно указать опцию «ignore-setters», для установки метода несмотря на наличие сеттеров.
+
+$result[]
+
+^if($method is string){
+	$method[^method.split[:;h]]
+
+	^if(def $method.1){
+		$class[$method.0]
+		$method[$method.1]
+	}{
+		$class[MAIN]
+		$method[$method.0]
+	}
+
+	$method[^reflection:method[$class;$method]]
+}
+
+$options[^fe[$options]{^hash::create[]}]
+$classes[^fd[$classes]{^self.classes[]}]
+
+^classes.sub[
+	$.bool[]
+	$.console[]
+	$.cookie[]
+	$.curl[]
+	$.date[]
+	$.double[]
+	$.env[]
+	$.file[]
+	$.form[]
+	$.hash[]
+	$.hashfile[]
+	$.image[]
+	$.inet[]
+	$.int[]
+	$.json[]
+	$.mail[]
+	$.math[]
+	$.memcached[]
+	$.memory[]
+	$.reflection[]
+	$.regex[]
+	$.request[]
+	$.response[]
+	$.status[]
+	$.string[]
+	$.table[]
+	$.void[]
+	$.xdoc[]
+	$.xnode[]
+]
+
+^classes.foreach[class_name;]{
+	$class[^reflection:class_by_name[$class_name]]
+
+	^if(
+			(
+				!^self.has[$class;$method_name]
+				|| ^options.force.bool(false)
+			)
+		&& (
+			!^self.has[$class;SET_$method_name]
+			&& !^self.has[$class;SET_DEFAULT]
+			|| ^options.ignore-setters.bool(false)
+		)
+	){
+		$class.$method_name[$method]
 	}
 }
