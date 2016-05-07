@@ -327,7 +327,7 @@ $base[^reflection:base[$object]]
 #
 # $result bool
 
-# Возвращает истину, если cреди предков указанного объекта или класса имеется указанный.
+# Возвращает истину, если cреди предков указанного объекта или класса имеется заданный.
 
 $ancestors[^self.ancestors[$object;$ancestor]]
 
@@ -429,14 +429,14 @@ $classes[^fd[$classes]{^self.classes[]}]
 	$class[^reflection:class_by_name[$class_name]]
 
 	^if(
-			(
-				!^self.has[$class;$method_name]
-				|| ^options.force.bool(false)
-			)
+		(
+			!^self.has[$class;$method_name]
+			|| ^options.force.bool(false)
+		)
 		&& (
 			!^self.has[$class;SET_$method_name]
 			&& !^self.has[$class;SET_DEFAULT]
-			|| ^options.ignore-setters.bool(false)
+			|| ^options.[ignore-setters].bool(false)
 		)
 	){
 		$class.$method_name[$method]
