@@ -110,7 +110,8 @@ $result(false)
 		$exception.type eq 'parser.runtime'
 		&& (
 # 			ошибка при проверке string
-			^exception.comment.pos[it has no elements] > -1
+			^exception.comment.pos[element can not be fetched from string] > -1
+			|| ^exception.comment.pos[it has no elements] > -1
 # 			ошибка при проверке таблицы
 			|| ^exception.comment.pos[column not found] > -1
 # 			ошибка при проверке regex и console
@@ -327,7 +328,7 @@ $base[^reflection:base[$object]]
 #
 # $result bool
 
-# Возвращает истину, если cреди предков указанного объекта или класса имеется заданный.
+# Возвращает истину, если cреди предков указанного объекта или класса имеется указанный.
 
 $ancestors[^self.ancestors[$object;$ancestor]]
 
@@ -359,7 +360,7 @@ $result(^ancestors.contains[$ancestor])
 }
 
 
-@pass[method_name;method;classes;options]
+@inject[method_name;method;classes;options]
 # $method_name string
 # $method      junction / string
 # [$classes]   hash
@@ -368,7 +369,7 @@ $result(^ancestors.contains[$ancestor])
 # $result void
 
 # Устанавливает указанным классам указанный метод под указанным именем.
-# Если класы не указаны — устанавливает метод всем доступным пользовательским классам.
+# Если классы не указаны — устанавливает метод всем доступным пользовательским классам.
 
 # Существующие методы не перекрываются, если не указана опция «force».
 # Установка метода не производится, если у класса имеется сеттер свойства с именем, совпадающим с устанавливаемым или сеттер по умолчанию.
@@ -436,7 +437,7 @@ $classes[^fd[$classes]{^self.classes[]}]
 		&& (
 			!^self.has[$class;SET_$method_name]
 			&& !^self.has[$class;SET_DEFAULT]
-			|| ^options.[ignore-setters].bool(false)
+			|| ^options.ignore-setters.bool(false)
 		)
 	){
 		$class.$method_name[$method]
