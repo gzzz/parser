@@ -1,0 +1,117 @@
+﻿@main[]
+$result[]
+
+^__executor__:run[]
+
+
+
+@CLASS
+__executor__
+
+
+@OPTIONS
+static
+locals
+
+
+@auto[]
+$self.separator[^for[](1;50){-}]
+$self.history[executor.log]
+
+
+@run[]
+$self.buffer[]
+$self.emptylines(0)
+
+^self.print[Parser $env:PARSER_VERSION]
+^self.print[$separator^#0A]
+
+^while(true){
+	$in[^console:line.trim[end;^#0D^#0A]]
+
+	^if(def $in){
+		$self.emptylines(0)
+		$self.buffer[${self.buffer}$in^#0A]
+
+		^switch[$in]{
+			^case[:clear]{
+				$self.buffer[]
+				$self.result[$void]
+				$self.emptylines(0)
+
+				^self.print[$separator]
+			}
+			^case[:exit]{
+				^self.print[Bye]
+
+				^break[]
+			}
+		}
+	}($self.emptylines == 1){
+		^try{
+			$m[^math:uid64[]]
+			$self.buffer[^untaint[as-is]{$self.buffer}]
+
+			$result[^process{$self.buffer}[
+				$.main[$m]
+				$.file[console]
+			]]
+
+			^if($$m is junction){
+				$m[$$m]
+
+				$result[^m[]]
+			}
+		}{
+			$exception.handled(true)
+
+			$result[]
+
+			^self.print_exception[$exception;^reflection:stack[]]
+		}
+
+		^if(!($result is void)){
+			$result[^json:string[$result;$.indent(true)]]
+		}
+
+		^self.print[$result]
+		^self.print[^#0A$self.separator^#0A]
+
+		$history[$self.buffer^#0A$result^#0A$self.separator^#0A]
+		^history.save[append;$self.history]
+
+		$self.buffer[]
+		$self.emptylines(0)
+	}{
+		$self.buffer[${self.buffer}^#0A]
+
+		^self.emptylines.inc[]
+	}
+}
+
+
+@print[string]
+$console:line[$string]
+
+
+@print_exception[exception;stack]
+^self.print[$self.separator]
+^self.print[Unhandled Exception (Debug)]
+^self.print[$exception.type]
+
+^if(def $exception.source){
+	^self.print[]
+	^self.print[$exception.file ($exception.lineno)]
+	^self.print[$exception.source]
+	^self.print[$exception.comment]
+}
+
+^if($stack){
+	^self.print[]
+
+	^stack.foreach[;item]{
+		^self.print[$item.name $item.file^($item.line^)]
+	}
+}
+
+^self.print[$self.separator]
