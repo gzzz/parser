@@ -14,13 +14,20 @@ doskey /macrofile=%USERPROFILE%\aliases.txt
 ####Create aliases file and add executor alias
 `%USERPROFILE%\aliases.txt`:
 …
-p3=pushd D:\web\home\ & D:\web\usr\local\parser3\parser3.exe executor.html
+p3=pushd D:\web\home\ & D:\web\usr\local\parser3\parser3.exe p3 $*
 
 ###Nix
 #####Add executor alias
 `~/.bash_aliases`:
 …
-alias p3=/web/home/parser3/parser3.cgi executor.html
+alias p3=/web/home/parser3/parser3.cgi p3 $@
+
+Or just place p3 file into one of the PATH locations.
+
+#Arguments
+##Root
+You can specify the document-root as `root` argument:
+	> p3 -root /web/
 
 ####Reload profile aliases
 	> ~/.bash_profile
@@ -33,9 +40,10 @@ alias p3=/web/home/parser3/parser3.cgi executor.html
 	Parser 3.4.5rc (compiled on i386-pc-win32)
 	--------------------------------------------------
 
-###Print commands and add two empty lines after to execute it
+###Print commands and add @ to execute it
 
 	^eval(2 * 2)
+	@
 
 ###Get the JSON result
 
@@ -43,14 +51,31 @@ alias p3=/web/home/parser3/parser3.cgi executor.html
 
 	--------------------------------------------------
 
-##Bultin commands
+##Commands
+###Help
+Display short help.
+	`@help` or `@h`
+
+###Execute
+Execute entered code.
+	`@`
+
 ###Clear
-Command clear input buffer.
-	`:clear`
+Clear input buffer.
+	`@clear` or `@c`
+
+###Parser version
+Display Parser version.
+	`@version` or `@v`
+
+###Info
+Display environment information.
+	`@info` or `@i`
 
 ###Exit
-Exit from executor (you alse can use ctrl + с / super + c).
-	`:exit`
+Exit from executor (you also can use ctrl + с or super + c).
+	`@exit` or `@e`
+
 
 ## History
-All executed commands and results a stored into `history.log` file near `executor.html`.
+All executed commands and results a stored into `p3-history.log` file located near `p3` file.

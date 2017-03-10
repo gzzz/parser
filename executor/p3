@@ -1,0 +1,209 @@
+﻿#!/usr/bin/env parser3
+
+@main[]
+$result[]
+
+^__executor__:run[]
+
+
+
+@CLASS
+__executor__
+
+
+@OPTIONS
+static
+locals
+
+
+@auto[filespec]
+$self.filespec[$filespec]
+$self.separator[^for[](1;50){-}]
+$self.history[^file:justname[$filespec]-history.log]
+$self.args[^self.parse_args[$request:argv]]
+
+^if(def $self.args.root){
+	$request:document-root[$self.args.root]
+}
+
+
+@parse_args[args]
+$result[^hash::create[]]
+
+^args.foreach[index;arg]{
+	^if(^arg.left(1) eq '-'){
+		$result.[^arg.mid(1)][$args.[^eval($index + 1)]]
+	}
+}
+
+
+@run[]
+$self.buffer[]
+
+^self.version[]
+^self.print[$separator^#0A]
+
+^while(true){
+	$in[^console:line.trim[end;^#0D^#0A]]
+
+	^if(def $in){
+		^switch[$in]{
+			^case[@help;@h]{
+				^self.help[]
+			}
+			^case[@clear;@c]{
+				^self.clear[]
+			}
+			^case[@version;@v]{
+				^self.version[]
+			}
+			^case[@info;@i]{
+				^self.info[]
+			}
+			^case[@exit;@e]{
+				^self.exit[]
+			}
+			^case[@]{
+				^self.exec[]
+			}
+			^case[DEFAULT]{
+				$self.buffer[${self.buffer}$in^#0A]
+			}
+		}
+	}{
+		$self.buffer[${self.buffer}^#0A]
+	}
+}
+
+
+@print[string]
+$console:line[^string.replace[\n;^#0A]]
+
+
+@print_exception[exception;stack]
+^self.print[$self.separator]
+^self.print[Unhandled Exception (Debug)]
+^self.print[$exception.type]
+
+^if(def $exception.source){
+	^self.print[]
+	^self.print[$exception.file ($exception.lineno)]
+	^self.print[$exception.source]
+	^self.print[$exception.comment]
+}
+
+^if($stack){
+	^self.print[]
+
+	^stack.foreach[;item]{
+		^self.print[$item.name $item.file^($item.line^)]
+	}
+}
+
+^self.print[$self.separator]
+
+
+@pad[string;padding]
+$result[$string^for[](0;$padding - ^string.length[] - 1){ }]
+
+
+@help[]
+^self.print[Parser3 interactive executor]
+^self.version[]
+
+$commands[
+Commands
+$self.separator
+^@               execute entered code
+^@help or ^@h     display this help
+^@version or ^@v  display parser version
+^@info or ^@i     display environment information
+^@clear or ^@c    clear input buffer
+^@exit or ^@e     exit from executor
+$self.separator
+]
+
+^self.print[$commands]
+
+
+@info[]
+$env[$env:fields]
+$padding(0)
+
+^env.sort[field;]{$field}
+
+^env.foreach[field;value]{
+	$length(^field.length[])
+
+	^if($length > $padding){
+		$padding($length)
+	}
+}
+
+^self.print[Document root]
+^self.print[$self.separator]
+^self.print[$request:document-root]
+^self.print[$self.separator]
+
+^self.print[Environment]
+^self.print[$self.separator]
+^env.foreach[field;value]{
+	^if(def $field){
+		^self.print[^self.pad[$field]($padding)  $value]
+	}
+}
+^self.print[$self.separator]
+
+
+@version[]
+^self.print[Parser $env:PARSER_VERSION]
+
+
+@exec[]
+^try{
+	$m[^math:uid64[]]
+	$self.buffer[^untaint[as-is]{$self.buffer}]
+
+	$result[^process{$self.buffer}[
+		$.main[$m]
+		$.file[$self.filespec]
+	]]
+
+	^if($$m is junction){
+		$m[$$m]
+
+		$result[^m[]]
+	}
+}{
+	$exception.handled(true)
+
+	$result[]
+
+	^self.print_exception[$exception;^reflection:stack[]]
+}
+
+^if(!($result is void)){
+	$result[^json:string[$result;$.indent(true)]]
+}
+
+^self.print[]
+^self.print[$result]
+^self.print[^#0A$self.separator^#0A]
+
+$history[$self.buffer^#0A$result^#0A$self.separator^#0A]
+^history.save[append;$self.history]
+
+$self.buffer[]
+
+
+@clear[]
+$self.buffer[]
+$self.result[$void]
+
+^self.print[$separator]
+
+
+@exit[]
+^self.print[Bye]
+
+^break[]
