@@ -24,11 +24,6 @@ alias p3=/web/home/parser3/parser3.cgi p3 $@
 
 Or just place p3 file into one of the PATH locations.
 
-#Arguments
-##Root
-You can specify the document-root as `root` argument:
-	> p3 -root /web/
-
 ####Reload profile aliases
 	> ~/.bash_profile
 
@@ -51,30 +46,35 @@ You can specify the document-root as `root` argument:
 
 	--------------------------------------------------
 
+#Arguments
+##Root
+You can specify the document-root as `root` argument:
+`> p3 -root /web/`
+
 ##Commands
 ###Help
 Display short help.
-	`@help` or `@h`
+`@help` or `@h`
 
 ###Execute
 Execute entered code.
-	`@`
+`@`
 
 ###Clear
 Clear input buffer.
-	`@clear` or `@c`
+`@clear` or `@c`
 
 ###Parser version
 Display Parser version.
-	`@version` or `@v`
+`@version` or `@v`
 
 ###Info
 Display environment information.
-	`@info` or `@i`
+`@info` or `@i`
 
 ###Exit
 Exit from executor (you also can use ctrl + с or super + c).
-	`@exit` or `@e`
+`@exit` or `@e`
 
 
 ## History
