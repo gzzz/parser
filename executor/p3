@@ -111,19 +111,17 @@ $result[$string^for[](0;$padding - ^string.length[] - 1){ }]
 ^self.print[Parser3 interactive executor]
 ^self.version[]
 
-$commands[
+^self.print[
 Commands
 $self.separator
 ^@               execute entered code
-^@help or @h     display this help
+^@help    or @h  display this help
 ^@version or @v  display parser version
-^@info or @i     display environment information
-^@clear or @c    clear input buffer
-^@exit or @e     exit from executor
+^@info    or @i  display environment information
+^@clear   or @c  clear input buffer
+^@exit    or @e  exit from executor
 $self.separator
 ]
-
-^self.print[$commands]
 
 
 @info[]
