@@ -7,25 +7,32 @@
 
 ####Create autorun command file
 `%USERPROFILE%\autorun.cmd`:
+```
 @echo off
 chcp 65001 > nul
 doskey /macrofile=%USERPROFILE%\aliases.txt
+```
 
 ####Create aliases file and add executor alias
 `%USERPROFILE%\aliases.txt`:
+```
 …
 p3=pushd D:\web\home\ & D:\web\usr\local\parser3\parser3.exe p3 $*
-
+```
 ###Nix
 #####Add executor alias
 `~/.bash_aliases`:
+```
 …
 alias p3=/web/home/parser3/parser3.cgi p3 $@
+```
 
 Or just place p3 file into one of the PATH locations.
 
 ####Reload profile aliases
-	> ~/.bash_profile
+```
+> ~/.bash_profile
+```
 
 ##Usage
 ###Run executor
@@ -49,32 +56,28 @@ Or just place p3 file into one of the PATH locations.
 #Arguments
 ##Root
 You can specify the document-root as `root` argument:
-`> p3 -root /web/`
+```
+> p3 -root /web/
+```
 
 ##Commands
 ###Help
-Display short help.
-`@help` or `@h`
+`@help` or `@h` – display short help.
 
 ###Execute
-Execute entered code.
-`@`
+`@` – execute entered code.
 
 ###Clear
-Clear input buffer.
-`@clear` or `@c`
+`@clear` or `@c` – clear input buffer.
 
 ###Parser version
-Display Parser version.
-`@version` or `@v`
+`@version` or `@v` – display Parser version.
 
 ###Info
-Display environment information.
-`@info` or `@i`
+`@info` or `@i` – display environment information.
 
 ###Exit
-Exit from executor (you also can use ctrl + с or super + c).
-`@exit` or `@e`
+`@exit` or `@e` – exit from executor (you also can use ctrl + с or super + c).
 
 
 ## History
