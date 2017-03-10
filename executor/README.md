@@ -31,7 +31,7 @@ Or just place p3 file into one of the PATH locations.
 
 ####Reload profile aliases
 ```
-> ~/.bash_profile
+> . ~/.bash_profile
 ```
 
 ##Usage
