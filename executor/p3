@@ -115,11 +115,11 @@ $commands[
 Commands
 $self.separator
 ^@               execute entered code
-^@help or ^@h     display this help
-^@version or ^@v  display parser version
-^@info or ^@i     display environment information
-^@clear or ^@c    clear input buffer
-^@exit or ^@e     exit from executor
+^@help or @h     display this help
+^@version or @v  display parser version
+^@info or @i     display environment information
+^@clear or @c    clear input buffer
+^@exit or @e     exit from executor
 $self.separator
 ]
 
