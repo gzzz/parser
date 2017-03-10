@@ -161,19 +161,17 @@ $padding(0)
 
 @exec[]
 ^try{
-	$m[^math:uid64[]]
+	$main[^math:uid64[]]
 	$self.buffer[^untaint[as-is]{$self.buffer}]
 
-	$result[^process{$self.buffer}[
-		$.main[$m]
+	$result[^process[$MAIN:CLASS]{$self.buffer}[
+		$.main[$main]
 		$.file[$self.filespec]
 		$.replace(true)
 	]]
 
-	^if($$m is junction){
-		$m[$$m]
-
-		$result[^m[]]
+	^if($MAIN:$main is junction){
+		$result[^MAIN:$main[]]
 	}
 }{
 	$exception.handled(true)
