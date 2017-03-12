@@ -60,6 +60,9 @@ $self.buffer[]
 			^case[@info;@i]{
 				^self.info[]
 			}
+			^case[@fork;@f]{
+				^main[]
+			}
 			^case[@exit;@e]{
 				^self.exit[]
 			}
@@ -119,6 +122,7 @@ $self.separator
 ^@version or @v  display parser version
 ^@info    or @i  display environment information
 ^@clear   or @c  clear input buffer
+^@fork    or @f  clone executor
 ^@exit    or @e  exit from executor
 $self.separator
 ]

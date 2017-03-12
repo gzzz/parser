@@ -76,6 +76,9 @@ You can specify the document-root as `root` argument:
 ###Info
 `@info` or `@i` – display environment information.
 
+###New executor
+`@fork` or `@f` – start new executor in current environment.
+
 ###Exit
 `@exit` or `@e` – exit from executor (you also can use ctrl + с or super + c).
 
