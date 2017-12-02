@@ -1,11 +1,11 @@
-#Interactive Parser3 code executor
+# Interactive Parser3 code executor
 
-##Aliases
-###Windows
-####Add autorun key into system regisrty
+## Aliases
+### Windows
+#### Add autorun key into system regisrty
 	reg add "HKCU\Software\Microsoft\Command Processor" /v AutoRun /t REG_EXPAND_SZ /d "%"USERPROFILE"%\autorun.cmd" /f
 
-####Create autorun command file
+#### Create autorun command file
 `%USERPROFILE%\autorun.cmd`:
 ```
 @echo off
@@ -13,14 +13,14 @@ chcp 65001 > nul
 doskey /macrofile=%USERPROFILE%\aliases.txt
 ```
 
-####Create aliases file and add executor alias
+#### Create aliases file and add executor alias
 `%USERPROFILE%\aliases.txt`:
 ```
 …
 p3=pushd D:\web\home\ & D:\web\usr\local\parser3\parser3.exe p3 $*
 ```
-###Nix
-#####Add executor alias
+### Nix
+##### Add executor alias
 `~/.bash_aliases`:
 ```
 …
@@ -29,25 +29,25 @@ alias p3=/web/home/parser3/parser3.cgi p3 $@
 
 Or just place p3 file into one of the PATH locations.
 
-####Reload profile aliases
+#### Reload profile aliases
 ```
 > . ~/.bash_profile
 ```
 
-##Usage
-###Run executor
+## Usage
+### Run executor
 
 	p3
 
 	Parser 3.4.5rc (compiled on i386-pc-win32)
 	--------------------------------------------------
 
-###Print commands and add @ to execute it
+### Print commands and add @ to execute it
 
 	^eval(2 * 2)
 	@
 
-###Get the JSON result
+### Get the JSON result
 
 	"4"
 
@@ -60,26 +60,26 @@ You can specify the document-root as `root` argument:
 > p3 -root /web/
 ```
 
-##Commands
-###Help
+## Commands
+### Help
 `@help` or `@h` – display short help.
 
-###Execute
+### Execute
 `@` – execute entered code.
 
-###Clear
+### Clear
 `@clear` or `@c` – clear input buffer.
 
-###Parser version
+### Parser version
 `@version` or `@v` – display Parser version.
 
-###Info
+### Info
 `@info` or `@i` – display environment information.
 
-###New executor
+### New executor
 `@fork` or `@f` – start new executor in current environment.
 
-###Exit
+### Exit
 `@exit` or `@e` – exit from executor (you also can use ctrl + с or super + c).
 
 
