@@ -1,0 +1,263 @@
+﻿@USE
+recaptcha2.p
+
+
+@auto[]
+$self.params[
+	$.sitekey[…]
+	$.secret[…]
+
+	$.errors[
+		$.timeout-or-duplicate[Timeout or duplicate.]
+		$.missing-input-secret[The secret parameter is missing.]
+		$.invalid-input-secret[The secret parameter is invalid or malformed.]
+		$.missing-input-response[The response parameter is missing.]
+		$.invalid-input-response[The response parameter is invalid or malformed.]
+		$.bad-request[The request is invalid or malformed.]
+	]
+]
+
+$self.handler[$form:type]
+^if(!def $self.handler){
+	$self.handler[common]
+}
+
+$navigation[
+	$.common[Common]
+	$.delayed[Delayed]
+	$.lazy[Lazy]
+	$.invisible[Invisible]
+]
+$self.navigation[<p>
+	^navigation.foreach[type;label]{
+		^if($type eq $self.handler){
+			<strong>$label</strong>
+		}{
+			<a href="?type=$type">$label</a>
+		}
+	}
+</p>
+<hr/>]
+
+
+@main[]
+^self.[$self.handler][]
+
+
+@common[]
+$recaptcha[^recaptcha2::create[$self.params]]
+
+$debug{
+	<h2>Form</h2>
+	<pre>^json:string[$form:fields;$.indent(true)]</pre>
+	<h2>Response</h2>
+	<pre>^json:string[$response;$.indent(true)]</pre>
+}
+
+<!DOCTYPE html>
+<html lang="ru">
+	<head>
+		<meta charset="utf-8">
+		<title>Common reCAPTCHA 2</title>
+	</head>
+	<body>
+		$self.navigation
+
+		^if($request:method eq 'POST'){
+			^recaptcha.verify[$form:fields]{
+				<h1>Passed</h1>
+				$debug
+			}{
+				<h1>Failed</h1>
+				$debug
+			}
+		}{
+			$script[^recaptcha.script[
+				$.defer(true)
+				$.async(true)
+			]]
+			$challenge[^recaptcha.challenge[]]
+
+			<pre>^apply-taint[^taint[html;$script]]</pre>
+			<pre>^apply-taint[^taint[html;$challenge]]</pre>
+
+			<form action="" method="post">
+				$challenge
+
+				<button type="submit">Отправить</button>
+			</form>
+
+			$script
+		}
+	</body>
+</html>
+
+
+@delayed[]
+$recaptcha[^recaptcha2::create[$self.params]]
+
+$debug{
+	<h2>Form</h2>
+	<pre>^json:string[$form:fields;$.indent(true)]</pre>
+	<h2>Response</h2>
+	<pre>^json:string[$response;$.indent(true)]</pre>
+}
+
+<!DOCTYPE html>
+<html lang="ru">
+	<head>
+		<meta charset="utf-8">
+		<title>Delayed reCAPTCHA 2</title>
+	</head>
+	<body>
+		$self.navigation
+
+		^if($request:method eq 'POST'){
+			^recaptcha.verify[$form:fields]{
+				<h1>Passed</h1>
+				$debug
+			}{
+				<h1>Failed</h1>
+				$debug
+			}
+		}{
+			$script[^recaptcha.script[
+				$.defer(true)
+				$.async(true)
+				$.onload[loaded]
+			]]
+			$challenge[^recaptcha.challenge[
+				$.id[challenge]
+				$.theme[dark]
+				$.size[compact]
+			]]
+
+			<pre>^apply-taint[^taint[html;$script]]</pre>
+			<pre>^apply-taint[^taint[html;$challenge]]</pre>
+
+			<form action="" method="post">
+				$challenge
+
+				<button type="submit">Отправить</button>
+			</form>
+
+			$script
+
+			<script>
+				function loaded(){
+					console.log('recaptcha inited!')^;
+
+					var challenge = document.getElementById('challenge')^;
+
+					challenge.innerText = 'Loading…'^;
+
+					setTimeout(function(){
+						challenge.innerText = ''^;
+						grecaptcha.render(challenge)^;
+					}, 1000)^;
+				}
+			</script>
+		}
+	</body>
+</html>
+
+
+@invisible[]
+$recaptcha[^invisible_recaptcha2::create[$self.params]]
+
+$debug{
+	<h2>Form</h2>
+	<pre>^json:string[$form:fields;$.indent(true)]</pre>
+	<h2>Response</h2>
+	<pre>^json:string[$response;$.indent(true)]</pre>
+}
+
+<!DOCTYPE html>
+<html lang="ru">
+	<head>
+		<meta charset="utf-8">
+		<title>Delayed reCAPTCHA 2</title>
+	</head>
+	<body>
+		$self.navigation
+
+		^if($request:method eq 'POST'){
+			^recaptcha.verify[$form:fields]{
+				<h1>Passed</h1>
+				$debug
+			}{
+				<h1>Failed</h1>
+				$debug
+			}
+		}{
+			$script[^recaptcha.script[
+				$.defer(true)
+				$.async(true)
+			]]
+			$challenge[<button type="submit"^recaptcha.challenge[
+				$.badge[inline]
+				$.callback[submit]
+			]>Отправить</button>]
+
+			<pre>^apply-taint[^taint[html;$script]]</pre>
+			<pre>^apply-taint[^taint[html;$challenge]]</pre>
+
+			<form id="form" action="" method="post">
+				$challenge
+			</form>
+
+			<script>
+				function submit(token){
+					document.getElementById('form').submit()^;
+				}
+			</script>
+
+			$script
+		}
+	</body>
+</html>
+
+
+@lazy[]
+$recaptcha[^recaptcha2::create[$self.params]]
+
+$debug{
+	<h2>Form</h2>
+	<pre>^json:string[$form:fields;$.indent(true)]</pre>
+	<h2>Response</h2>
+	<pre>^json:string[$response;$.indent(true)]</pre>
+}
+
+<!DOCTYPE html>
+<html lang="ru">
+	<head>
+		<meta charset="utf-8">
+		<title>Common reCAPTCHA 2</title>
+	</head>
+	<body>
+		$self.navigation
+
+		^if($request:method eq 'POST'){
+			^recaptcha.verify[$form:fields]{
+				<h1>Passed</h1>
+				$debug
+			}{
+				<h1>Failed</h1>
+				$debug
+			}
+		}{
+			$challenge[^recaptcha.print[
+				$.defer(true)
+				$.async(true)
+			]]
+
+			<pre>^apply-taint[^taint[html;$challenge]]</pre>
+
+			<form action="" method="post">
+				$challenge
+
+				<button type="submit">Отправить</button>
+			</form>
+		}
+	</body>
+</html>
