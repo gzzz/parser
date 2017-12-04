@@ -131,10 +131,16 @@ $result[
 
 	$caller.response[$response]
 
-	^if(^response.success.bool(false)){
-		$result[$passed]
+	$success(^response.success.bool(false))
+
+	^if(^reflection:is[passed;code] && ^reflection:is[failed;code]){
+		^if($success){
+			$result[$passed]
+		}{
+			$result[$failed]
+		}
 	}{
-		$result[$failed]
+		$result($success)
 	}
 }
 
