@@ -1,0 +1,34 @@
+﻿@USE
+jwt.p
+
+
+@main[]
+$secret[secret]
+$payload[
+	$.a[1]
+	$.b[2]
+	$.c[3]
+	$.d[4]
+]
+
+$token[^jwt:encode[$payload;$secret]]
+
+encoded:
+<pre>$token</pre>
+
+decoded:
+<pre>^json:string[^jwt:decode[$token;$secret];$.indent(true)]</pre>
+
+# ---------
+
+$jwt[^jwt::create[
+	$.secret[$secret]
+	$.algorithm[hs512]
+]]
+$token[^jwt.encode[$payload]]
+
+encoded:
+<pre>$token</pre>
+
+decoded:
+<pre>^json:string[^jwt.decode[$token];$.indent(true)]</pre>
