@@ -53,8 +53,8 @@ Or just place p3 file into one of the PATH locations.
 
 	--------------------------------------------------
 
-#Arguments
-##Root
+# Arguments
+## Root
 You can specify the document-root as `root` argument:
 ```
 > p3 -root /web/
