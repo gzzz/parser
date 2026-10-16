@@ -58,8 +58,8 @@ runs: 1 | utime: 0.000000 | stime: 0.000000 | used: 0 | allocated since start: 2
 
 ### Print command and add @ with specified number of runs to execute it multiple times
 ```
-	^math:uuid[]
-	@ 10000
+^math:uuid[]
+@ 10000
 ```
 ### Get the JSON-result with execution statistics
 ```
