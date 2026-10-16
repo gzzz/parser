@@ -72,8 +72,8 @@ runs: 10000 | utime: 0.124801 | stime: 0.000000 | used: 1212 | allocated since s
 
 
 
-#Arguments
-##Root
+# Arguments
+## Root
 You can specify the document-root as `root` argument:
 ```
 > p3 -root /web/
