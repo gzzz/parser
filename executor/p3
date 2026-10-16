@@ -18,7 +18,7 @@ locals
 
 @auto[filespec]
 $self.filespec[$filespec]
-$self.separator[^for[](1;50){-}]
+$self.separator[^for[](1;100){-}]
 $self.history[^file:justname[$filespec]-history.log]
 $self.args[^self.parse_args[$request:argv]]
 
@@ -44,10 +44,11 @@ $self.buffer[]
 ^self.print[$separator^#0A]
 
 ^while(true){
-	$in[^console:line.trim[end;^#0D^#0A]]
+	$command[^console:line.trim[end;^#0D^#0A]]
+	$commands[^command.split[ ;h]]
 
-	^if(def $in){
-		^switch[$in]{
+	^if(def $commands.0){
+		^switch[$commands.0]{
 			^case[@help;@h]{
 				^self.help[]
 			}
@@ -67,10 +68,10 @@ $self.buffer[]
 				^self.exit[]
 			}
 			^case[@]{
-				^self.exec[]
+				^self.exec(^commands.1.int(1))
 			}
 			^case[DEFAULT]{
-				$self.buffer[${self.buffer}$in^#0A]
+				$self.buffer[${self.buffer}$command^#0A]
 			}
 		}
 	}{
@@ -117,13 +118,13 @@ $result[$string^for[](0;$padding - ^string.length[] - 1){ }]
 ^self.print[
 Commands
 $self.separator
-^@               execute entered code
-^@help    or @h  display this help
-^@version or @v  display parser version
-^@info    or @i  display environment information
-^@clear   or @c  clear input buffer
-^@fork    or @f  clone executor
-^@exit    or @e  exit from executor
+^@ ...          execute entered code (number of runs in optional argument)
+^@help    or @h display this help
+^@version or @v display parser version
+^@info    or @i display environment information
+^@clear   or @c clear input buffer
+^@fork    or @f clone executor
+^@exit    or @e exit from executor
 $self.separator
 ]
 
@@ -161,7 +162,7 @@ $padding(0)
 ^self.print[Parser $env:PARSER_VERSION]
 
 
-@exec[]
+@exec[runs]
 ^try{
 	$main[^math:uid64[]]
 	$self.buffer[^untaint[as-is]{$self.buffer}]
@@ -173,7 +174,11 @@ $padding(0)
 	]]
 
 	^if($MAIN:$main is junction){
-		$result[^MAIN:$main[]]
+		$stat[^self.usage{
+			^for[](1;$runs){
+				$result[^MAIN:$main[]]
+			}
+		}]
 	}
 }{
 	$exception.handled(true)
@@ -189,12 +194,59 @@ $padding(0)
 
 ^self.print[]
 ^self.print[$result]
-^self.print[^#0A$self.separator^#0A]
+^self.print[^#0A$self.separator]
+^self.print[runs: $runs | utime: ^stat.utime.format[%.6f] | stime: ^stat.stime.format[%.6f] | used: $stat.used | allocated since start: ^stat.ever_allocated_since_start.format[%.2f]]
+^self.print[$self.separator]
 
-$history[$self.buffer^#0A$result^#0A$self.separator^#0A]
+^self.print[]
+
+$history[^self.ts[]^#0A
+$self.buffer
+$result
+$self.separator
+]
 ^history.save[append;$self.history]
 
 $self.buffer[]
+^memory:compact[]
+
+
+@usage[code]
+$before[^self.snapshot[]]
+
+$code
+
+$after[^self.snapshot[]]
+$result[^self.delta[$before;$after]]
+
+$time($result.time / 1000000)
+$result.time[^time.format[%.6f]]
+
+
+@snapshot[]
+$r[$status:rusage]
+$m[$status:memory]
+
+$result[
+	$.utime($r.utime)
+	$.stime($r.stime)
+	$.used($m.used)
+	$.ever_allocated_since_start($m.ever_allocated_since_start)
+]
+
+
+@delta[before;after]
+$result[^hash::create[]]
+
+^before.foreach[field;begin]{
+	$result.$field($after.$field - $begin)
+}
+
+
+@ts[][result]
+$now[^date::now[]]
+
+^now.sql-string[]
 
 
 @clear[]

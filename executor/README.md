@@ -36,22 +36,41 @@ Or just place p3 file into one of the PATH locations.
 
 ## Usage
 ### Run executor
+```
+p3
 
-	p3
-
-	Parser 3.4.5rc (compiled on i386-pc-win32)
-	--------------------------------------------------
-
+Parser 3.5.0 (compiled on i386-pc-win32)
+----------------------------------------------------------------------------------------------------
+```
 ### Print commands and add @ to execute it
+```
+^eval(2 * 2)
+@
+```
+### Get the JSON result with execution statistics
+```
+"4"
 
-	^eval(2 * 2)
-	@
+----------------------------------------------------------------------------------------------------
+runs: 1 | utime: 0.000000 | stime: 0.000000 | used: 0 | allocated since start: 2.30
+----------------------------------------------------------------------------------------------------
+```
 
-### Get the JSON result
+### Print command and add @ with specified number of runs to execute it multiple times
+```
+	^math:uuid[]
+	@ 10000
+```
+### Get the JSON-result with execution statistics
+```
+"C712DBF6-E73C-47E2-8C1C-F935EA574ED7"
 
-	"4"
+----------------------------------------------------------------------------------------------------
+runs: 10000 | utime: 0.124801 | stime: 0.000000 | used: 1212 | allocated since start: 1446.75
+----------------------------------------------------------------------------------------------------
+```
 
-	--------------------------------------------------
+
 
 #Arguments
 ##Root
@@ -65,7 +84,7 @@ You can specify the document-root as `root` argument:
 `@help` or `@h` – display short help.
 
 ### Execute
-`@` – execute entered code.
+`@` – execute entered code. Number of runs in optional argument.
 
 ### Clear
 `@clear` or `@c` – clear input buffer.
